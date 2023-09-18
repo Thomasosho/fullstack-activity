@@ -18,7 +18,6 @@ app.get("/", (req, res) => {
 
 app.get("/api/deyPlay", async (req, res) => {
   const todos = await sql`SELECT * FROM todos`;
-  console.log(todos);
   if (todos) {
     res.status(200).send(todos);
   } else {
@@ -27,8 +26,9 @@ app.get("/api/deyPlay", async (req, res) => {
 });
 
 app.post("/api/deyPlayPost", async (req, res) => {
-  console.error('req.body', req.body);
   const { task, is_completed } = req.body;
+  // const task = req.body.task;
+  // const is_completed = req.body.is_completed;
   const deyPlayPost =
     await sql`INSERT INTO todos (task, is_completed) VALUES (${task}, ${is_completed}) RETURNING *`;
   if (deyPlayPost) {
@@ -40,6 +40,7 @@ app.post("/api/deyPlayPost", async (req, res) => {
 
 app.put("/api/deyPlayPost/:id", async (req, res) => {
   const { id } = req.params;
+  // const id = req.params.id
   const { task, is_completed } = req.body;
 
   try {
@@ -60,6 +61,29 @@ app.put("/api/deyPlayPost/:id", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+
+// app.put("/api/deyPlayPostTick/:id", async (req, res) => {
+//   const { id } = req.params;
+//   const { is_completed } = req.body;
+
+//   try {
+//     const updatedTodo = await sql`
+//       UPDATE todos
+//       SET is_completed = ${is_completed}
+//       WHERE id = ${id}
+//       RETURNING *
+//     `;
+
+//     if (updatedTodo && updatedTodo.length > 0) {
+//       res.status(200).json(updatedTodo[0]);
+//     } else {
+//       res.status(404).send("Todo not found");
+//     }
+//   } catch (error) {
+//     console.error("Error updating todo:", error);
+//     res.status(500).send("Internal server error");
+//   }
+// });
 
 app.delete("/api/deyPlayPost/:id", async (req, res) => {
   const { id } = req.params;

@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useEffect, useState } from "react";
 import "./App.css";
+// import routes from "routes.js";
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -9,7 +8,38 @@ function App() {
   const [editTaskId, setEditTaskId] = useState(null);
   const [editedTaskText, setEditedTaskText] = useState("");
 
-  // console.error('taskInputValue', taskInputValue);
+  // const [tick, setTick] = useState(false);
+
+  // console.error('rick', tick);
+
+  // const sendTick = async (id) => {
+  //   setTick(prev => !prev);
+  //   try {
+  //     const response = await fetch(`http://localhost:3000/api/deyPlayPostTick/${id}`, {
+  //       method: "PUT",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         is_completed: tick,
+  //       }),
+  //     });
+
+  //     console.error('response', response.json());
+
+  //     if (response.ok) {
+  //       setTodos((prevTodos) =>
+  //         prevTodos.map((todo) =>
+  //           todo.id === id ? { ...todo, is_completed: tick } : todo
+  //         )
+  //       );
+  //     } else {
+  //       console.error("Failed to update todo");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating todo:", error);
+  //   }
+  // };
 
   const startEdit = (id, taskText) => {
     setEditTaskId(id);
@@ -24,7 +54,6 @@ function App() {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        // Make a fetch GET request to your API endpoint
         const response = await fetch("http://localhost:3000/api/deyPlay");
 
         if (!response.ok) {
@@ -145,6 +174,8 @@ function App() {
           <li key={i} className="flex items-center mb-2">
             <input
               type="checkbox"
+              // checked={tick}
+              onChange={() => sendTick(todo.id) }
               className="mr-2 form-checkbox h-5 w-5 text-yellow-500"
             />
             {editTaskId === todo.id ? (
