@@ -1,18 +1,11 @@
-// const express = require('express')
-// const sql = require('./db')
 import express from "express";
 import sql from "./db.js";
 import cors from "cors";
 
 const app = express();
 const PORT = 3000;
-const data = [
-  { id: "1", task: "Take a bath", is_completed: true },
-  { id: "2", task: "Eatttttt", is_completed: false },
-  { id: "3", task: "Eas some more", is_completed: false },
-  { id: "4", task: "Rest", is_completed: true },
-];
 
+app.use(express.json());
 app.use(
   cors({
     origin: ["http://localhost:5173"],
@@ -23,67 +16,67 @@ app.get("/", (req, res) => {
   res.send("Welcome to the todo list backend");
 });
 
-app.get("/api/todos", async (req, res) => {
-  const todos = await sql`SELECT * FROM todos`
-  console.log(todos)
-  if (todos) {
-    res.status(200).send(todos)
-  } else {
-    res.status(404).send("Error here!")
-  }
-});
-
 app.get("/api/deyPlay", async (req, res) => {
-  const todos = await sql`SELECT * FROM deyplay`
-  console.log(todos)
+  const todos = await sql`SELECT * FROM todos`;
+  console.log(todos);
   if (todos) {
-    res.status(200).send(todos)
+    res.status(200).send(todos);
   } else {
-    res.status(404).send("Error here!")
+    res.status(404).send("Error here!");
   }
 });
 
-// app.get("/api/todos2", async(req, res) => {
-//   const todos2 = await sql `INSERT INTO todos (task,is_completed) VALUES ('Eat jollof rice', false)`
-//   res.send(todos2)
-// })
+app.post("/api/deyPlayPost", async (req, res) => {
+  console.error('req.body', req.body);
+  const { task, is_completed } = req.body;
+  const deyPlayPost =
+    await sql`INSERT INTO todos (task, is_completed) VALUES (${task}, ${is_completed}) RETURNING *`;
+  if (deyPlayPost) {
+    res.status(201).send(deyPlayPost);
+  } else {
+    res.status(500).send("Internal server Error");
+  }
+});
 
-app.post("/api/todosPost", async (req, res) => {
-  const newTodo = req.body;
-  console.log('hhh', newTodo);
+app.put("/api/deyPlayPost/:id", async (req, res) => {
+  const { id } = req.params;
+  const { task, is_completed } = req.body;
 
   try {
-    const result = await sql`
-      INSERT INTO todos (task, is_completed)
-      VALUES (${newTodo.task}, ${newTodo.is_completed})
+    const updatedTodo = await sql`
+      UPDATE todos
+      SET task = ${task}, is_completed = ${is_completed}
+      WHERE id = ${id}
+      RETURNING *
     `;
 
-    if (result) {
-      res.status(201).send("Successfully Created");
+    if (updatedTodo && updatedTodo.length > 0) {
+      res.status(200).json(updatedTodo[0]);
     } else {
-      res.status(404).send("Error while creating");
+      res.status(404).send("Todo not found");
     }
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).send("Internal Server Error");
+    console.error("Error updating todo:", error);
+    res.status(500).send("Internal server error");
   }
 });
 
-app.post("/api/deyPlayPost", async(req, res) => {
-  const deyPlay = await sql `INSERT INTO deyplay (task, is_completed) VALUES ('Jus Dey Play', false)`
-  if(deyPlay) {
-    res.status(201).send("Successfully Created")
-  } else {
-    res.status(404).send("Error while creating")
+app.delete("/api/deyPlayPost/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedTodo =
+      await sql`DELETE FROM todos WHERE id = ${id} RETURNING *`;
+
+    if (deletedTodo && deletedTodo.length > 0) {
+      res.status(200).json(deletedTodo[0]);
+    } else {
+      res.status(404).send("Todo not found");
+    }
+  } catch (error) {
+    console.error("Error deleting todo:", error);
+    res.status(500).send("Internal server error");
   }
-});
-
-app.get("/data", (req, res) => {
-  res.json(data);
-});
-
-app.get("/secret", (req, res) => {
-  res.status(403).end();
 });
 
 app.listen(PORT, () => {
